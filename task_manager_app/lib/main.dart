@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/api/api_client.dart';
 import 'features/auth/bloc/login_bloc.dart';
 import 'features/auth/data/repositories/auth_repository.dart';
-import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/splash/presentation/screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,12 +33,12 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: MaterialApp(
-          title: 'Flutter Dio Login Base',
+          title: 'TaskCraft',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.indigo,
+              seedColor: const Color(0xFF4F46E5),
               brightness: Brightness.light,
             ),
             appBarTheme: const AppBarTheme(
@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
           darkTheme: ThemeData(
             useMaterial3: true,
             colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.indigo,
+              seedColor: const Color(0xFF4F46E5),
               brightness: Brightness.dark,
             ),
             appBarTheme: const AppBarTheme(
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
           themeMode: ThemeMode.system,
-          home: const LoginScreen(),
+          home: const SplashScreen(),
         ),
       ),
     );
