@@ -6,7 +6,7 @@ class TaskItem {
   final String title;
   final String category;
   final String time;
-  final String priority; // High, Medium, Low
+  final String priority; 
   bool isCompleted;
 
   TaskItem({
