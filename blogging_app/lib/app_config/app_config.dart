@@ -3,21 +3,25 @@ enum Flavor { prod, dev }
 class AppConfig {
   AppConfig._(
     this.appName,
-    this.baseUrl,
+    this.userBaseUrl,
     this.flavor,
   );
 
   static AppConfig shared = AppConfig.create();
 
   final String appName;
-  final String baseUrl;
+  final String userBaseUrl;
   final Flavor flavor;
 
   factory AppConfig.create({
     String appName = 'Blogging App',
-    String baseUrl = 'https://api.example.com/api/v1/',
+    String userBaseUrl = 'https://api.example.com/api/user/',
     Flavor flavor = Flavor.dev,
   }) {
-    return shared = AppConfig._(appName, baseUrl, flavor);
+    return shared = AppConfig._(
+      appName,
+      userBaseUrl,
+      flavor,
+    );
   }
 }
