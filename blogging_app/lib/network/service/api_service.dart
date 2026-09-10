@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:blogging_app/network/models/blod_add_response.dart';
 import 'package:blogging_app/network/models/blog_list_response.dart';
+import 'package:blogging_app/network/models/comment_add_response.dart';
+import 'package:blogging_app/network/models/comment_list_response.dart';
 import 'package:dio/dio.dart';
 
 import '../../constants/api_constants.dart';
@@ -74,5 +76,42 @@ class ApiService {
       responseData is String ? responseData : jsonEncode(responseData),
     );
   }
+
+  Future<CommentAddResponseData> addComment({
+    required String content,
+    required String blogId,
+  }) async {
+    final response = await DioApiHelper.postBlog(
+      '${ApiUrlConstants.addComment}/$blogId',
+      data: {
+        'content': content,
+      },
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to add comment');
+    }
+    final responseData = response.data;
+    return commentAddResponseDataFromJson(
+      responseData is String ? responseData : jsonEncode(responseData),
+    );
+  }
+
+  Future<List<CommentListResponseData>> getCommentList({
+    required String blogId,
+  }) async {
+    final response = await DioApiHelper.getBlog(
+      '${ApiUrlConstants.commentList}/$blogId',
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Failed to fetch comment list');
+    }
+    final responseData = response.data;
+    return commentListResponseDataFromJson(
+      responseData is String ? responseData : jsonEncode(responseData),
+    );
+  }
   
-}
+} 
+    

@@ -1,3 +1,5 @@
+import 'package:blogging_app/network/models/comment_add_response.dart';
+import 'package:blogging_app/network/models/comment_list_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -148,6 +150,74 @@ class LoginProvider with ChangeNotifier {
     } on Object catch (error) {
       _errorMessage = error.toString();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<CommentAddResponseData> addComment({
+    required String content,
+    required String blogId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.addComment(
+        content: content,
+        blogId: blogId,
+      );
+      return response;
+    } on DioException catch (error) {
+      final data = error.response?.data;
+      if (data is Map && data['error'] is String) {
+        _errorMessage = data['error'] as String;
+      } else if (error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout) {
+        _errorMessage =
+            'Connection failed. Check the server URL and network connection.';
+      } else {
+        _errorMessage = error.message ?? 'Request failed.';
+      }
+      rethrow;
+    } on Object catch (error) {
+      _errorMessage = error.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<List<CommentListResponseData>> getCommentList({
+    required String blogId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _apiService.getCommentList(blogId: blogId);
+      return response;
+    } on DioException catch (error) {
+      final data = error.response?.data;
+      if (data is Map && data['error'] is String) {
+        _errorMessage = data['error'] as String;
+      } else if (error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout) {
+        _errorMessage =
+            'Connection failed. Check the server URL and network connection.';
+      } else {
+        _errorMessage = error.message ?? 'Request failed.';
+      }
+      rethrow;
+    } on Object catch (error) {
+      _errorMessage = error.toString();
+      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
