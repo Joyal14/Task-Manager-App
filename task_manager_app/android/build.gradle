@@ -1,0 +1,39 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+def newBuildDir = rootProject.layout.buildDirectory.dir("../../build").get()
+rootProject.layout.buildDirectory.value(newBuildDir)
+
+subprojects {
+    def newSubprojectBuildDir = newBuildDir.dir(project.name)
+    project.layout.buildDirectory.value(newSubprojectBuildDir)
+}
+
+subprojects {
+    def setCompileSdk = { p ->
+        if (p.plugins.hasPlugin("com.android.application") || p.plugins.hasPlugin("com.android.library")) {
+            p.android {
+                compileSdkVersion 36
+            }
+        }
+    }
+    if (project.state.executed) {
+        setCompileSdk(project)
+    } else {
+        project.afterEvaluate { p ->
+            setCompileSdk(p)
+        }
+    }
+}
+
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.layout.buildDirectory
+}
