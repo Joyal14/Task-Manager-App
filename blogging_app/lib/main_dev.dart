@@ -4,9 +4,9 @@ import 'main.dart' as app;
 void main() {
   app.runBloggingApp(
     flavor: Flavor.dev,
-    baseUrl: const String.fromEnvironment(
+    userBaseUrl: const String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'http://192.168.1.4:8000/api/user/',
+      defaultValue: 'http://192.168.1.3:8000/api/user/',
     ),
   );
 }

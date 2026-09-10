@@ -3,8 +3,12 @@ class ApiUrlConstants {
   static const String apiVersion = 'version-check?';
   static const String apiConfig = 'config-api';
 
-  static const String login = '/signin';
-  static const String signup = '/signup';
+  static const String login = 'signin';
+  static const String signup = 'signup';
+  static const String addBlog = '../blog/add-blog-post';
+  static const String blogList = '../blog/blog-list';
+  static const String addComment = '../comment/add-comment';
+  static const String commentList = '../comment/get-comments';
 }
 
 class ApiMethods {
