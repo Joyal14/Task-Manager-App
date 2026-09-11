@@ -44,10 +44,17 @@ class LoginProvider with ChangeNotifier {
   }
 
   Future<void> initialize() async {
-    await Future<void>.delayed(const Duration(seconds: 1));
+    final splashStartedAt = DateTime.now();
 
     final token = await _secureStorageService.readAuthToken();
     final hasSeenOnboarding = await _secureStorageService.hasSeenOnboarding();
+
+    final elapsed = DateTime.now().difference(splashStartedAt);
+    const minimumSplashDuration = Duration(seconds: 2);
+    final remaining = minimumSplashDuration - elapsed;
+    if (remaining > Duration.zero) {
+      await Future<void>.delayed(remaining);
+    }
 
     _token = token;
     DioApiHelper.accessToken = _token;

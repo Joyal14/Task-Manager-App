@@ -18,7 +18,7 @@ import 'screens/splash/splash_screen.dart';
 void main() {
   runBloggingApp(
     flavor: Flavor.prod,
-    userBaseUrl: 'https://api.example.com/api/user/',
+    userBaseUrl: 'http://blogging-env.eba-yyr9apua.ap-south-1.elasticbeanstalk.com/api/user/',
   );
 }
 

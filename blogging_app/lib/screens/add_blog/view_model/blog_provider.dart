@@ -42,6 +42,9 @@ class BlogProvider extends ChangeNotifier {
   Future<void> pickImage() async {
     final pickedImage = await _imagePicker.pickImage(
       source: ImageSource.gallery,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 70,
     );
 
     if (pickedImage == null) {
