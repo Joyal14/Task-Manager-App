@@ -1,6 +1,6 @@
 import 'package:blogging_app/screens/add_blog/view_model/blog_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 class AddBlogScreen extends StatelessWidget {
@@ -9,9 +9,9 @@ class AddBlogScreen extends StatelessWidget {
   static const routeName = '/add_blog';
 
   Future<void> _submit(BuildContext context) async {
-    final provider = context.read<BlogProvider>();
-    final title = provider.title.trim();
-    final content = provider.content.trim();
+    final cubit = context.read<BlogCubit>();
+    final title = cubit.state.title.trim();
+    final content = cubit.state.content.trim();
 
     if (title.isEmpty || content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -19,7 +19,7 @@ class AddBlogScreen extends StatelessWidget {
       );
       return;
     }
-    if (provider.selectedImage == null) {
+    if (cubit.state.selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Choose a cover image for your story.')),
       );
@@ -27,13 +27,13 @@ class AddBlogScreen extends StatelessWidget {
     }
 
     try {
-      final response = await provider.addBlogData(
+      final response = await cubit.addBlogData(
         title: title,
         content: content,
-        imagePath: provider.selectedImage!.path,
+        imagePath: cubit.state.selectedImage!.path,
       );
       if (!context.mounted) return;
-      await provider.clearData();
+      cubit.clearData();
       if (context.mounted) Navigator.pop(context, response.message);
     } catch (error) {
       if (!context.mounted) return;
@@ -54,8 +54,8 @@ class AddBlogScreen extends StatelessWidget {
           tooltip: 'Close',
         ),
       ),
-      body: Consumer<BlogProvider>(
-        builder: (context, provider, child) => SingleChildScrollView(
+      body: BlocBuilder<BlogCubit, BlogState>(
+        builder: (context, state) => SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,14 +75,14 @@ class AddBlogScreen extends StatelessWidget {
               const _FieldLabel(label: 'Cover image'),
               const SizedBox(height: 8),
               _CoverPicker(
-                provider: provider,
+                cubit: context.read<BlogCubit>(),
                 colors: Theme.of(context).colorScheme,
               ),
               const SizedBox(height: 24),
               const _FieldLabel(label: 'Title'),
               const SizedBox(height: 8),
               TextField(
-                onChanged: provider.setTitle,
+                onChanged: context.read<BlogCubit>().setTitle,
                 textInputAction: TextInputAction.next,
                 decoration: const InputDecoration(
                   hintText: 'Give your story a memorable title',
@@ -93,7 +93,7 @@ class AddBlogScreen extends StatelessWidget {
               const _FieldLabel(label: 'Your story'),
               const SizedBox(height: 8),
               TextField(
-                onChanged: provider.setContent,
+                onChanged: context.read<BlogCubit>().setContent,
                 minLines: 7,
                 maxLines: 10,
                 textCapitalization: TextCapitalization.sentences,
@@ -107,17 +107,17 @@ class AddBlogScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 54,
                 child: FilledButton.icon(
-                  onPressed: provider.isSubmitting
+                  onPressed: state.isSubmitting
                       ? null
                       : () => _submit(context),
-                  icon: provider.isSubmitting
+                  icon: state.isSubmitting
                       ? const SizedBox.square(
                           dimension: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.publish_rounded),
                   label: Text(
-                    provider.isSubmitting ? 'Publishing...' : 'Publish story',
+                    state.isSubmitting ? 'Publishing...' : 'Publish story',
                   ),
                 ),
               ),
@@ -146,20 +146,20 @@ class _FieldLabel extends StatelessWidget {
 }
 
 class _CoverPicker extends StatelessWidget {
-  const _CoverPicker({required this.provider, required this.colors});
+  const _CoverPicker({required this.cubit, required this.colors});
 
-  final BlogProvider provider;
+  final BlogCubit cubit;
   final ColorScheme colors;
 
   @override
   Widget build(BuildContext context) {
-    final image = provider.selectedImage;
+    final image = cubit.state.selectedImage;
     return Material(
       color: colors.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: provider.pickImage,
+        onTap: cubit.pickImage,
         child: SizedBox(
           height: 190,
           width: double.infinity,
@@ -182,7 +182,7 @@ class _CoverPicker extends StatelessWidget {
                       right: 12,
                       top: 12,
                       child: IconButton.filled(
-                        onPressed: provider.pickImage,
+                        onPressed: cubit.pickImage,
                         icon: const Icon(Icons.edit_rounded),
                         tooltip: 'Change image',
                       ),

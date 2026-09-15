@@ -1,7 +1,7 @@
 import 'package:blogging_app/screens/add_blog/views/add_blog_screen.dart';
 import 'package:blogging_app/network/models/blog_list_response.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../add_blog/view_model/blog_provider.dart';
 import '../../onboard/view_model/login_provider.dart';
@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(message)));
-      await context.read<BlogProvider>().fetchBlogList(force: true);
+      await context.read<BlogCubit>().fetchBlogList(force: true);
     }
   }
 
@@ -40,32 +40,33 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Consumer<BlogProvider>(
-        builder: (context, provider, child) {
-          if (!provider.hasLoadedBlogs &&
-              !provider.isLoadingBlogs &&
-              provider.blogsError == null) {
+      body: BlocBuilder<BlogCubit, BlogState>(
+        builder: (context, state) {
+          final cubit = context.read<BlogCubit>();
+          if (!state.hasLoadedBlogs &&
+              !state.isLoadingBlogs &&
+              state.blogsError == null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) provider.fetchBlogList();
+              if (context.mounted) cubit.fetchBlogList();
             });
           }
 
-          if (provider.isLoadingBlogs && !provider.hasLoadedBlogs) {
+          if (state.isLoadingBlogs && !state.hasLoadedBlogs) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (provider.blogsError != null && !provider.hasLoadedBlogs) {
+          if (state.blogsError != null && !state.hasLoadedBlogs) {
             return _StatusView(
               icon: Icons.cloud_off_outlined,
               title: 'Could not load your blogs',
               actionLabel: 'Try again',
-              onAction: () => provider.fetchBlogList(force: true),
+              onAction: () => cubit.fetchBlogList(force: true),
             );
           }
 
-          final blogs = provider.blogs;
+          final blogs = state.blogs;
           return RefreshIndicator(
-            onRefresh: () => provider.fetchBlogList(force: true),
+            onRefresh: () => cubit.fetchBlogList(force: true),
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),

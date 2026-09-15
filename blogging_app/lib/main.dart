@@ -1,6 +1,7 @@
 import 'package:blogging_app/screens/add_blog/view_model/blog_provider.dart';
 import 'package:blogging_app/screens/add_blog/views/add_blog_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import 'app_config/app_config.dart';
@@ -39,8 +40,8 @@ void runBloggingApp({
           create: (_) => LoginProvider(ApiService())..initialize(),
         ),
 
-        ChangeNotifierProvider(
-          create: (_) => BlogProvider(ApiService()),
+        BlocProvider(
+          create: (_) => BlogCubit(ApiService()),
         ),
       ],
       child: const MyApp(),

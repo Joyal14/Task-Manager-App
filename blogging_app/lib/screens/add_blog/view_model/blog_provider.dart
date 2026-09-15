@@ -2,42 +2,66 @@ import 'dart:io';
 import 'package:blogging_app/network/models/blod_add_response.dart';
 import 'package:blogging_app/network/models/blog_list_response.dart';
 import 'package:blogging_app/network/service/api_service.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
-class BlogProvider extends ChangeNotifier {
+class BlogState {
+  const BlogState({
+    this.selectedImage,
+    this.title = '',
+    this.content = '',
+    this.blogs = const [],
+    this.isLoadingBlogs = false,
+    this.hasLoadedBlogs = false,
+    this.isSubmitting = false,
+    this.blogsError,
+  });
+
+  final File? selectedImage;
+  final String title;
+  final String content;
+  final List<Blog> blogs;
+  final bool isLoadingBlogs;
+  final bool hasLoadedBlogs;
+  final bool isSubmitting;
+  final String? blogsError;
+
+  BlogState copyWith({
+    File? selectedImage,
+    bool clearSelectedImage = false,
+    String? title,
+    String? content,
+    List<Blog>? blogs,
+    bool? isLoadingBlogs,
+    bool? hasLoadedBlogs,
+    bool? isSubmitting,
+    String? blogsError,
+    bool clearBlogsError = false,
+  }) {
+    return BlogState(
+      selectedImage: clearSelectedImage
+          ? null
+          : selectedImage ?? this.selectedImage,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      blogs: blogs ?? this.blogs,
+      isLoadingBlogs: isLoadingBlogs ?? this.isLoadingBlogs,
+      hasLoadedBlogs: hasLoadedBlogs ?? this.hasLoadedBlogs,
+      isSubmitting: isSubmitting ?? this.isSubmitting,
+      blogsError: clearBlogsError ? null : blogsError ?? this.blogsError,
+    );
+  }
+}
+
+class BlogCubit extends Cubit<BlogState> {
   final ApiService apiService;
   final ImagePicker _imagePicker = ImagePicker();
-   String _title = '';
-  String _content = '';
 
-  BlogProvider(this.apiService);
+  BlogCubit(this.apiService) : super(const BlogState());
 
-  File? _selectedImage;
-  List<Blog> _blogs = [];
-  bool _isLoadingBlogs = false;
-  bool _hasLoadedBlogs = false;
-    bool _isSubmitting = false;
-  String? _blogsError;
+  void setTitle(String value) => emit(state.copyWith(title: value));
 
-  File? get selectedImage => _selectedImage;
-  List<Blog> get blogs => List.unmodifiable(_blogs);
-  bool get isLoadingBlogs => _isLoadingBlogs;
-  bool get hasLoadedBlogs => _hasLoadedBlogs;
-    bool get isSubmitting => _isSubmitting;
-  String? get blogsError => _blogsError;
-
-    String get title => _title;
-  String get content => _content;
-
-
- void setTitle(String value) {
-    _title = value;
-  }
-
-  void setContent(String value) {
-    _content = value;
-  }
+  void setContent(String value) => emit(state.copyWith(content: value));
 
   Future<void> pickImage() async {
     final pickedImage = await _imagePicker.pickImage(
@@ -51,8 +75,7 @@ class BlogProvider extends ChangeNotifier {
       return;
     }
 
-    _selectedImage = File(pickedImage.path);
-    notifyListeners();
+    emit(state.copyWith(selectedImage: File(pickedImage.path)));
   }
 
   Future<BlogAddResponseData> addBlogData({
@@ -60,12 +83,11 @@ class BlogProvider extends ChangeNotifier {
     required String content,
     required String imagePath,
   }) async {
-    if (_selectedImage == null) {
+    if (state.selectedImage == null) {
       throw Exception('No image selected');
     }
 
-    _isSubmitting = true;
-    notifyListeners();
+    emit(state.copyWith(isSubmitting: true));
     try {
       return await apiService.addBlog(
         title: title,
@@ -73,34 +95,36 @@ class BlogProvider extends ChangeNotifier {
         imagePath: imagePath,
       );
     } finally {
-      _isSubmitting = false;
-      notifyListeners();
+      emit(state.copyWith(isSubmitting: false));
     }
   }
 
-  Future<void> clearData() async {
-    _title = '';
-    _content = '';
-    _selectedImage = null;
-    notifyListeners();
+  void clearData() {
+    emit(state.copyWith(
+      title: '',
+      content: '',
+      clearSelectedImage: true,
+    ));
   }
-  Future<void> fetchBlogList({bool force = false}) async {
-    if (_isLoadingBlogs || (_hasLoadedBlogs && !force)) return;
 
-    _isLoadingBlogs = true;
-    _blogsError = null;
-    notifyListeners();
+  Future<void> fetchBlogList({bool force = false}) async {
+    if (state.isLoadingBlogs || (state.hasLoadedBlogs && !force)) return;
+
+    emit(state.copyWith(
+      isLoadingBlogs: true,
+      clearBlogsError: true,
+    ));
 
     try {
       final response = await apiService.getBlogList();
-      _blogs = response.blogs;
-      _hasLoadedBlogs = true;
+      emit(state.copyWith(
+        blogs: List.unmodifiable(response.blogs),
+        hasLoadedBlogs: true,
+      ));
     } catch (error) {
-      _blogsError = error.toString();
+      emit(state.copyWith(blogsError: error.toString()));
     } finally {
-      _isLoadingBlogs = false;
-      notifyListeners();
+      emit(state.copyWith(isLoadingBlogs: false));
     }
   }
-
 }
