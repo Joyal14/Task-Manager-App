@@ -34,6 +34,11 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Your journal'),
         actions: [
           IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/chat'),
+            icon: const Icon(Icons.chat_bubble_outline_rounded),
+            tooltip: 'Open chat with all users',
+          ),
+          IconButton(
             onPressed: () => context.read<LoginProvider>().logout(),
             icon: const Icon(Icons.logout),
             tooltip: 'Log out',

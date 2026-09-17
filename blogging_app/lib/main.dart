@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'app_config/app_config.dart';
 import 'network/service/api_service.dart';
 
+import 'screens/chat/view/chat_screen.dart';
+import 'screens/chat/view_model/chat_provider.dart';
 import 'screens/home/view/home_screen.dart';
 
 import 'screens/onboard/view/login_screen.dart';
@@ -39,7 +41,9 @@ void runBloggingApp({
         ChangeNotifierProvider(
           create: (_) => LoginProvider(ApiService())..initialize(),
         ),
-
+        ChangeNotifierProvider(
+          create: (_) => ChatProvider(),
+        ),
         BlocProvider(
           create: (_) => BlogCubit(ApiService()),
         ),
@@ -77,6 +81,7 @@ class MyApp extends StatelessWidget {
         SignupScreen.routeName: (_) => const SignupScreen(),
         HomeScreen.routeName: (_) => const HomeScreen(),
         AddBlogScreen.routeName: (_) => const AddBlogScreen(),
+        ChatScreen.routeName: (_) => const ChatScreen(),
       },
     );
   }
