@@ -1,11 +1,14 @@
 import 'package:blogging_app/screens/add_blog/view_model/blog_provider.dart';
 import 'package:blogging_app/screens/add_blog/views/add_blog_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import 'app_config/app_config.dart';
 import 'network/service/api_service.dart';
 
+import 'screens/chat/view/chat_screen.dart';
+import 'screens/chat/view_model/chat_provider.dart';
 import 'screens/home/view/home_screen.dart';
 
 import 'screens/onboard/view/login_screen.dart';
@@ -18,7 +21,7 @@ import 'screens/splash/splash_screen.dart';
 void main() {
   runBloggingApp(
     flavor: Flavor.prod,
-    userBaseUrl: 'https://api.example.com/api/user/',
+    userBaseUrl: 'http://blogging-env.eba-yyr9apua.ap-south-1.elasticbeanstalk.com/api/user/',
   );
 }
 
@@ -38,9 +41,11 @@ void runBloggingApp({
         ChangeNotifierProvider(
           create: (_) => LoginProvider(ApiService())..initialize(),
         ),
-
         ChangeNotifierProvider(
-          create: (_) => BlogProvider(ApiService()),
+          create: (_) => ChatProvider(),
+        ),
+        BlocProvider(
+          create: (_) => BlogCubit(ApiService()),
         ),
       ],
       child: const MyApp(),
@@ -76,6 +81,7 @@ class MyApp extends StatelessWidget {
         SignupScreen.routeName: (_) => const SignupScreen(),
         HomeScreen.routeName: (_) => const HomeScreen(),
         AddBlogScreen.routeName: (_) => const AddBlogScreen(),
+        ChatScreen.routeName: (_) => const ChatScreen(),
       },
     );
   }

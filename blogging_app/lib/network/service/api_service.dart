@@ -45,14 +45,24 @@ class ApiService {
     required String content,
     required String imagePath,
   }) async {
-    final response = await DioApiHelper.postBlog(
-      ApiUrlConstants.addBlog,
-      data: FormData.fromMap({
-        'title': title,
-        'content': content,
-        'image': await MultipartFile.fromFile(imagePath),
-      }),
-    );
+    late Response<dynamic> response;
+    try {
+      response = await DioApiHelper.postBlog(
+        ApiUrlConstants.addBlog,
+        data: FormData.fromMap({
+          'title': title,
+          'content': content,
+          'image': await MultipartFile.fromFile(imagePath),
+        }),
+      );
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 413) {
+        throw Exception(
+          'This image is too large. Please choose a smaller image.',
+        );
+      }
+      rethrow;
+    }
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('Failed to add blog');
